@@ -202,7 +202,7 @@ def get_patients_table(query):
     
     # Add each patient to the table
     for patient in patients_data['patients']:
-        table_html += f"<tr><td>{html.escape(patient['fname'])}</td><td>{html.escape(patient['identity'])}</td><td>{html.escape(patient['cellnum'])}</td><td>{html.escape(patient['email'])}</td><td>{html.escape(patient['homeaddress'])}</td><td>{html.escape(patient['gender'])}</td></tr>"
+        table_html += f"<tr><td>{html.escape(patient.fname)}</td><td>{html.escape(patient.identity)}</td><td>{html.escape(patient.cellnum)}</td><td>{html.escape(patient.email)}</td><td>{html.escape(patient.homeaddress)}</td><td>{html.escape(patient.gender)}</td></tr>"
     
     # Close the table
     table_html += "</table>"
