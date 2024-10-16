@@ -241,9 +241,25 @@ def get_patients_by_gender(tgender, query):
         page=query['page'],
         per_page=query['per_page']
     )
+    
+    def get_page_url(page):
+        return url_for('get_patients_by_gender', tgender=tgender, page=page, per_page=query['per_page'], _external=True)
+
+    pagination_info = {
+        'page': pagination.page,
+        'per_page': pagination.per_page,
+        'pages': pagination.pages,
+        'total': pagination.total,
+        'current': get_page_url(pagination.page),
+        'first': get_page_url(1),
+        'last': get_page_url(pagination.pages),
+        'prev': get_page_url(pagination.prev_num) if pagination.has_prev else None,
+        'next': get_page_url(pagination.next_num) if pagination.has_next else None
+    }
+
     patients_data = {
         'patients': pagination.items,
-        'pagination': pagination_builder(pagination)
+        'pagination': pagination_info
     }
 
     # Start building the HTML table
@@ -256,15 +272,13 @@ def get_patients_by_gender(tgender, query):
     # Close the table
     table_html += "</table>"
     
-    # Store the table in a variable
-    patients_table = table_html
-    
     # Return the table as part of a JSON response
     return jsonify({
-        "table": patients_table,
-        "pagination": patients_data['pagination'],
-        "message": "Patient data retrieved successfully"
+        "table": table_html,
+        "pagination": pagination_info,
+        "message": f"Patient data for gender '{tgender}' retrieved successfully"
     })
+    
 # delete a record
 @app.delete('/patients/eid/<int:eid>')
 @app.output({}, 204)
