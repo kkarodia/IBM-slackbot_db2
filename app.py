@@ -14,7 +14,8 @@ from apiflask.fields import Integer, String, Boolean, Date, List, Nested
 from apiflask.validators import Length, Range
 # Database access using SQLAlchemy
 from flask_sqlalchemy import SQLAlchemy
-from flask import abort, request
+from flask import abort, request, jsonify
+import html
 
 # Set how this API should be titled and the current version
 API_TITLE='Events API for Watson Assistant'
@@ -176,7 +177,46 @@ def get_event_eid(eid):
     Retrieve a single event record by its EID
     """
     return EventModel.query.get_or_404(eid)
+    
+#create table for all patients 
+@app.get('/get_patients_table')
+@app.input(EventQuerySchema, 'query')
+@app.output(EventsOutSchema)
+@app.auth_required(auth)
+def get_patients_table(query):
+    """all events
+    Retrieve all event records
+    """
+    pagination = EventModel.query.paginate(
+        page=query['page'],
+        per_page=query['per_page']
+    )
 
+    patients_data = {
+        'patients': pagination.items,
+        'pagination': pagination_builder(pagination)
+    }
+
+    # Start building the HTML table
+    table_html = "<table border='1'><tr><th>Name</th><th>ID</th><th>Cell</th><th>Email</th><th>Address</th><th>Gender</th></tr>"
+    
+    # Add each patient to the table
+    for patient in patients_data['patients']:
+        table_html += f"<tr><td>{html.escape(patient['fname'])}</td><td>{html.escape(patient['identity'])}</td><td>{html.escape(patient['cellnum'])}</td><td>{html.escape(patient['email'])}</td><td>{html.escape(patient['homeaddress'])}</td><td>{html.escape(patient['gender'])}</td></tr>"
+    
+    # Close the table
+    table_html += "</table>"
+    
+    # Store the table in a variable
+    patients_table = table_html
+    
+    # Return the table as part of a JSON response
+    return jsonify({
+        "table": patients_table,
+        "pagination": patients_data['pagination'],
+        "message": "Patient data retrieved successfully"
+    })
+    
 # retrieve a single event record by name
 @app.get('/patients/name/<string:fname>')
 @app.output(EventOutSchema)
