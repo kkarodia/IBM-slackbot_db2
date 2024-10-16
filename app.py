@@ -241,11 +241,30 @@ def get_patients_by_gender(tgender, query):
         page=query['page'],
         per_page=query['per_page']
     )
-    return {
+    patients_data = {
         'patients': pagination.items,
         'pagination': pagination_builder(pagination)
     }
 
+    # Start building the HTML table
+    table_html = "<table border='1'><tr><th>Name</th><th>ID</th><th>Cell</th><th>Email</th><th>Address</th><th>Gender</th></tr>"
+    
+    # Add each patient to the table
+    for patient in patients_data['patients']:
+        table_html += f"<tr><td>{html.escape(patient.fname)}</td><td>{html.escape(patient.identity)}</td><td>{html.escape(patient.cellnum)}</td><td>{html.escape(patient.email)}</td><td>{html.escape(patient.homeaddress)}</td><td>{html.escape(patient.gender)}</td></tr>"
+    
+    # Close the table
+    table_html += "</table>"
+    
+    # Store the table in a variable
+    patients_table = table_html
+    
+    # Return the table as part of a JSON response
+    return jsonify({
+        "table": patients_table,
+        "pagination": patients_data['pagination'],
+        "message": "Patient data retrieved successfully"
+    })
 # delete a record
 @app.delete('/patients/eid/<int:eid>')
 @app.output({}, 204)
